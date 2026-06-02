@@ -1,0 +1,32 @@
+#' A `tibble` of activity data exported by an ActiGraph device
+#'
+#' This tibble has several attributes, most importantly, `epochlength`.
+#' @param data A `tibble` of raw activity counts.
+#' @param settings A `tibble` of device settings.
+#' @return A `tibble` of activity data. It has a time index, `timestamp`,
+#' one or more activity value columns, and attributes holding settings
+#' such as `epochlength`.
+#' @examples
+#' data("gtxplus1day")
+#' gtxplus1day
+#' attr(gtxplus1day, "epochlength")
+#' @export
+tbl_agd <- function(data, settings) {
+  assert_that(
+    is.data.frame(data),
+    is.data.frame(settings),
+    has_name(data, "axis1"),
+    has_name(data, "timestamp"),
+    has_name(settings, "epochlength")
+  )
+
+  for (key in names(settings)) {
+    attr(data, key) <- settings[[key]]
+  }
+  structure(data, class = c("tbl_df", "tbl", "data.frame"))
+}
+
+add_magnitude <- function(data) {
+  data %>%
+    mutate(magnitude = sqrt(.data$axis1^2 + .data$axis2^2 + .data$axis3^2))
+}
